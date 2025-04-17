@@ -1,0 +1,3 @@
+APP_NAME: "GitHub Integration"
+VISIBILITY: "public"
+POST_TEMPLATE: "새로운 업데이트가 있습니다! 🚀 확인해보세요: ${{ github.event.repository.html_url }}"
