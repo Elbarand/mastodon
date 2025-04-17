@@ -2,8 +2,6 @@ name: Share to Mastodon
 on:
   push:
     branches: [ main ]
-  release:
-    types: [ published ]
 
 jobs:
   share:
@@ -12,7 +10,7 @@ jobs:
       - name: Share to Mastodon
         uses: cbrgm/mastodon-github-action@v1
         with:
-          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-          message: "New update in my GitHub repository! 🚀 Check it out: ${{ github.event.repository.html_url }}"
+          access-token: ${{ qocxDPR09zu-1VjEI4hTJ14c6M7_nMrgoRZtMOeDDx4 }}  
+          message: "새로운 업데이트가 있습니다! 🚀"
           visibility: "public"
-          url: "https://el.elbarand.pics/" # 여기에 본인의 마스토돈 인스턴스 URL을 입력하세요
+          url: "https://el.elbarand.pics/" 
