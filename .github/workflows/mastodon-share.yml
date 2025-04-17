@@ -1,16 +1,21 @@
-name: Share to Mastodon
+﻿name: "Mastodon Share Workflow"
 on:
   push:
-    branches: [ main ]
+    branches:
+      - whipping-edition
+  release:
+    types:
+      - published
 
 jobs:
   share:
+    name: "Share to Mastodon"
     runs-on: ubuntu-latest
     steps:
-      - name: Share to Mastodon
+      - name: "Post to Mastodon"
         uses: cbrgm/mastodon-github-action@v1
         with:
-          access-token: ${{ qocxDPR09zu-1VjEI4hTJ14c6M7_nMrgoRZtMOeDDx4 }}  
-          message: "새로운 업데이트가 있습니다! 🚀"
-          visibility: "public"
-          url: "https://el.elbarand.pics/" 
+          access-token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          message: "New update in my GitHub repository! 🚀 Check it out: ${{ github.event.repository.html_url }}"
+          visibility: public
+          url: "https://el.elbarand.pics/"
