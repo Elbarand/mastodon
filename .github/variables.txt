@@ -1,0 +1,6 @@
+APP_NAME: My Mastodon Bot
+VISIBILITY: public
+MASTODON_LANGUAGE: ko
+POST_TEMPLATE: New update in my GitHub repository! 🚀
+EXPERIMENTAL_FEATURES: true
+UPDATE_CHECK_URL: https://api.joinmastodon.org/update-check
