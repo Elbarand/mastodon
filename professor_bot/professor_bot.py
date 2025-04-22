@@ -89,8 +89,34 @@ class ProfessorListener(StreamListener):
                 reply = handle_attendance(self.sheet, user_id)
                 mastodon.status_post(f"@{user_id} {reply}", in_reply_to_id=status_id, visibility="unlisted")
             elif "[과제]" in content:
+            elif "[주머니]" in content:
+                handle_inventory_request(self.sheet, mastodon, user_id, status_id)
+
                 reply = handle_homework(self.sheet, user_id)
                 mastodon.status_post(f"@{user_id} {reply}", in_reply_to_id=status_id, visibility="unlisted")
+
+
+# [주머니] 기능: 갈레온 + 인벤토리 확인
+def split_and_post_response(text, mastodon, acct, in_reply_to_id):
+    chunks = [text[i:i+500] for i in range(0, len(text), 500)]
+    prev_id = in_reply_to_id
+    for chunk in chunks:
+        status = mastodon.status_post(f"@{acct} {chunk}", in_reply_to_id=prev_id, visibility="unlisted")
+        prev_id = status["id"]
+
+def handle_inventory_request(sheet, mastodon, acct, in_reply_to_id):
+    player_tab = sheet.worksheet("플레이어")
+    records = player_tab.get_all_records()
+    for row in records:
+        if row["ID"] == acct:
+            galleon = row.get("갈레온", 0)
+            items = row.get("인벤토리", "")
+            items_text = items if items else "없음"
+            message = f"현재 보유 갈레온: {galleon}\n인벤토리: {items_text}"
+            split_and_post_response(message, mastodon, acct, in_reply_to_id)
+            return
+    mastodon.status_post(f"@{acct} 등록된 유저가 아닙니다.", in_reply_to_id=in_reply_to_id, visibility="unlisted")
+
 
 def main():
     print("🎓 교수봇이 마스토돈을 실시간 감시 중입니다...")
