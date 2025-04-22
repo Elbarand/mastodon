@@ -1,0 +1,27 @@
+name: 🎓 Deploy Professor Bot
+
+on:
+  push:
+    branches: [ "elbarand-bots" ]
+    paths:
+      - 'professor_bot/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: SSH and deploy Professor Bot
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ubuntu
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd ~/professor_bot
+          git pull origin elbarand-bots
+          pkill -f professor_bot.py || true
+          nohup python3 professor_bot.py > prof.log 2>&1 &

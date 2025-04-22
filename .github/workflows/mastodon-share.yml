@@ -1,0 +1,24 @@
+name: Share to Mastodon
+on:
+  push:
+    branches: [ whipping-edition ]
+  release:
+    types: [ published ]
+
+jobs:
+  share:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Share to Mastodon
+        uses: cbrgm/mastodon-github-action@v1
+        with:
+          message: "New update in my GitHub repository! 🚀 Check it out: ${{ github.event.repository.html_url }}"
+          visibility: "public"
+        env:
+          MASTODON_URL: "https://remember.elbarand.pics/"
+          MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_TOKEN }}
+
+
+
+
+
