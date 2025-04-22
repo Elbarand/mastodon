@@ -1,0 +1,13 @@
+[Unit]
+Description=Elbarand Mastodon Bots Runner
+After=network.target
+
+[Service]
+WorkingDirectory=/home/ubuntu/elbarand-bots/bots
+ExecStart=/usr/bin/python3 run_all_bots.py
+Restart=always
+User=ubuntu
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
