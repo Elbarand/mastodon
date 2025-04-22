@@ -9,13 +9,30 @@ from oauth2client.service_account import ServiceAccountCredentials
 from dotenv import load_dotenv
 
 load_dotenv()
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
-# 시트 연결
-def connect_to_sheet():
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(os.getenv("GOOGLE_CREDENTIALS_JSON"), scope)
-    client = gspread.authorize(creds)
-    return client.open_by_key(os.getenv("GOOGLE_SHEET_ID"))
+# 구글 시트 연동 설정
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('your_credentials.json', scope)
+client = gspread.authorize(creds)
+
+prof_sheet = client.open('시트이름').worksheet('professor')
+
+def check_bot_status(current_time):
+    records = prof_sheet.get_all_records()
+    for record in records:
+        if record['시간'] == current_time:
+            return record['상태'] == 'ON'
+    return False
+
+# 사용 예시
+current_time = datetime.now().strftime('%H:%M')
+if check_bot_status(current_time):
+    print("교수님 봇 활성화: 멘트 발송!")
+else:
+    print("교수님 봇 비활성화 상태입니다.")
 
 # 출석 처리
 def handle_attendance(sheet, user_id):
