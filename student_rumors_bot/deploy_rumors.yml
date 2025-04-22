@@ -1,0 +1,25 @@
+name: 🕵️ Deploy Rumor Bot
+
+on:
+  push:
+    paths:
+      - 'npc_rumor_bot/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: SSH into EC2 and deploy Rumor Bot
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ubuntu
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd ~/npc_rumor_bot
+          git pull origin main
+          pkill -f student_rumors.py || true
+          nohup python3 student_rumors.py > rumor.log 2>&1 &
