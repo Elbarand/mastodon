@@ -69,7 +69,23 @@ class ProfessorListener(StreamListener):
             user_id = notification["account"]["acct"].split("@")[0]
             status_id = notification["status"]["id"]
 
-            if "[출석]" in content:
+            if "[등록/" in content:
+                name = content.split("[등록/")[1].split("]")[0].strip()
+                if name:
+                    player_tab = self.sheet.worksheet("플레이어")
+                    records = player_tab.get_all_records()
+                    for row in records:
+                        if row["ID"] == user_id:
+                            reply = respond("등록중복").format(name=name)
+                            mastodon.status_post(f"@{user_id} {reply}", in_reply_to_id=status_id, visibility="unlisted")
+                            return
+                    next_row = len(records) + 2
+                    player_tab.update(f"A{next_row}:E{next_row}", [[name, user_id, 0, "", 0]])
+                    reply = respond("등록완료").format(name=name)
+                    mastodon.status_post(f"@{user_id} {reply}", in_reply_to_id=status_id, visibility="unlisted")
+                    return
+
+            elif "[출석]" in content:
                 reply = handle_attendance(self.sheet, user_id)
                 mastodon.status_post(f"@{user_id} {reply}", in_reply_to_id=status_id, visibility="unlisted")
             elif "[과제]" in content:
