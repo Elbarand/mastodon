@@ -1,3 +1,5 @@
+import random
+
 class NPCWeatherPreferences:
     def __init__(self, character_traits):
         self.weather_preferences = {
