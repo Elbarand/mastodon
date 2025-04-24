@@ -1,0 +1,6 @@
+# 로컬 Git 설정 (이미 git이 설치되어 있다고 가정)
+git init
+git add .
+git commit -m "Your commit message"
+git remote add origin https://github.com/yourusername/yourrepository.git
+git push -u origin master  # 처음 푸시할 때는 `-u` 플래그 추가
