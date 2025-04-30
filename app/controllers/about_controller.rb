@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
 class AboutController < ApplicationController
-  include WebAppControllerConcern
+  layout 'public'
 
-  skip_before_action :require_functional!
+  before_action :authenticate_user!, if: :chuchu_silo_mode?
 
   def show
-    expires_in(15.seconds, public: true, stale_while_revalidate: 30.seconds, stale_if_error: 1.day) unless user_signed_in?
+    render layout: 'public'
+  end
+
+  private
+
+  def chuchu_silo_mode?
+    Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
   end
 end
