@@ -1,33 +1,13 @@
 # frozen_string_literal: true
 
-class AddAccountsToListService < BaseService
-  def call(list, accounts)
-    @list = list
-    @accounts = accounts
+class AuthorizeFollowService < BaseService
+  def call(target_account, source_account, message = nil)
+    return nil if Rails.configuration.x.whip.silo_mode
 
-    return if @accounts.empty?
+    return nil unless target_account.locked?
 
-    update_list!
-    merge_into_list!
-  end
-
-  private
-
-  def update_list!
-    ApplicationRecord.transaction do
-      @accounts.each do |account|
-        @list.accounts << account
-      end
-    end
-  end
-
-  def merge_into_list!
-    MergeWorker.push_bulk(merge_account_ids) do |account_id|
-      [account_id, @list.id, 'list']
-    end
-  end
-
-  def merge_account_ids
-    ListAccount.where(list: @list, account: @accounts).where.not(follow_id: nil).pluck(:account_id)
+    follow_request = FollowRequest.create!(account: source_account, target_account: target_account)
+    ActivityPub::DeliveryWorker.perform_async(follow_request.id, source_account.id, 'Follow')
+    follow_request
   end
 end
