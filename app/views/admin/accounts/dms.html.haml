@@ -1,0 +1,22 @@
+- content_for :page_title do
+  = "다이렉트 메시지 - #{@account.acct}"
+
+.admin-container
+  .admin-header
+    %h2
+      = "다이렉트 메시지 - "
+      = link_to @account.acct, admin_account_path(@account), target: "_blank", rel: "noopener"
+
+  - if @dms.any?
+    .statuses
+      - @dms.each do |status|
+        .status
+          %p
+            %strong= status.account.username
+            = ": #{truncate(status.text, length: 140)}"
+          %p
+            %small= l(status.created_at, format: :short)
+  - else
+    %p 아무런 DM도 존재하지 않습니다.
+
+  = paginate @dms
