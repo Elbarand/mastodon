@@ -1,26 +1,21 @@
 # frozen_string_literal: true
 
 class AccountsController < ApplicationController
-  include AccountControllerConcern
   include SignatureVerification
-  include RateLimitHeaders
+  include WebAppControllerConcern
 
-  layout 'public'
-
+  before_action :require_account!
   before_action :set_account
-  before_action :check_account_suspension
-  before_action :set_cache_headers
   before_action :check_chuchu_mode!
 
   def show
     respond_to do |format|
       format.html do
-        expires_in(0, public: true) if user_signed_in?
-        fresh_when(etag: @account, last_modified: @account.updated_at)
+        expires_in(3.minutes, public: public_fetch_mode?)
       end
 
       format.json do
-        render json: @account, serializer: REST::AccountSerializer
+        render_with_cache json: @account, serializer: ActivityPub::ActorSerializer, adapter: ActivityPub::Adapter, content_type: 'application/activity+json'
       end
     end
   end
@@ -29,14 +24,6 @@ class AccountsController < ApplicationController
 
   def set_account
     @account = Account.find_local!(params[:username])
-  end
-
-  def set_cache_headers
-    response.headers['Cache-Control'] = 'no-store'
-  end
-
-  def check_account_suspension
-    not_found if @account.suspended?
   end
 
   def check_chuchu_mode!
