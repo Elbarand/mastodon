@@ -16,9 +16,13 @@ class TagsController < ApplicationController
   before_action :set_statuses, if: -> { request.format == :rss }
 
   skip_before_action :require_functional!, unless: :limited_federation_mode?
-  before_action :check_chuchu_mode!
 
   def show
+    if Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
+      not_found
+      return
+    end
+
     respond_to do |format|
       format.html do
         expires_in(15.seconds, public: true, stale_while_revalidate: 30.seconds, stale_if_error: 1.hour) unless user_signed_in?
@@ -58,11 +62,5 @@ class TagsController < ApplicationController
       id: tag_url(@tag),
       type: :ordered
     )
-  end
-
-  def check_chuchu_mode!
-    if Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
-      not_found
-    end
   end
 end
