@@ -35,7 +35,7 @@ class RelationshipsController < ApplicationController
   end
 
   def form_account_batch_params
-    params.expect(form_account_batch: [:action, account_ids: []])
+    params.require(:form_account_batch).permit(:action, account_ids: [])
   end
 
   def following_relationship?
@@ -55,13 +55,14 @@ class RelationshipsController < ApplicationController
   end
 
   def action_from_button
-    if params[:follow]
+    case
+    when params[:follow]
       'follow'
-    elsif params[:unfollow]
+    when params[:unfollow]
       'unfollow'
-    elsif params[:remove_from_followers]
+    when params[:remove_from_followers]
       'remove_from_followers'
-    elsif params[:block_domains] || params[:remove_domains_from_followers]
+    when params[:block_domains], params[:remove_domains_from_followers]
       'remove_domains_from_followers'
     end
   end
