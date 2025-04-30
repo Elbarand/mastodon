@@ -11,15 +11,19 @@ class ActivityPub::Activity
   end
 
   def perform
-    # ... 기존 코드 유지 ...
-  end
-
-  private
-
-  def deliver_to_remote_followers
-    return if visibility == :direct
-    return if status.account.local? && Rails.configuration.x.whip.silo_mode
-
-    ActivityPub::DeliveryWorker.perform_async(status.id, status.account_id)
-  end
-end
+    case json['type']
+    when 'Create'
+      process_create
+    when 'Update'
+      process_update
+    when 'Delete'
+      process_delete
+    when 'Follow'
+      process_follow
+    when 'Undo'
+      process_undo
+    when 'Like'
+      process_like
+    when 'Announce'
+      process_announce
+    when 'Block'
