@@ -1,14 +1,5 @@
-# frozen_string_literal: true
+def perform
+  return if Rails.configuration.x.whipping.disable_federation
 
-module ActivityPub
-  module Activity
-    class Create < Base
-      include JsonLdHelper
-
-      def perform
-        ActivityPub 전송을 무시하고 툿 저장만 수행
-        Rails.logger.info "ActivityPub 전파 차단: #{status.id}"
-      end
-    end
-  end
+  # 나머지 ActivityPub 툿 전송 처리
 end
