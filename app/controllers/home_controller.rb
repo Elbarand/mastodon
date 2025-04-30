@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 class HomeController < ApplicationController
-  include WebAppControllerConcern
+  layout 'public'
 
   def index
-    expires_in(15.seconds, public: true, stale_while_revalidate: 30.seconds, stale_if_error: 1.day) unless user_signed_in?
+    if Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
+      redirect_to new_user_session_path
+    end
   end
 end
