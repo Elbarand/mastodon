@@ -1,21 +1,24 @@
 # frozen_string_literal: true
 
 class TimelinesController < ApplicationController
-  include AccountControllerConcern
   layout 'public'
 
-  before_action :authenticate_user!  # 로그인 필수
-
-  before_action :set_instance_presenter
+  before_action :authenticate_user!, if: :chuchu_silo_mode?
 
   def public
     @body_classes = 'with-modals'
-    @page_title = I18n.t('statuses.public_timeline')
+    render action: 'public'
   end
 
   def tag
     @tag = Tag.find_normalized!(params[:id])
     @body_classes = 'with-modals'
-    @page_title = "##{@tag.name}"
+    render action: 'tag'
+  end
+
+  private
+
+  def chuchu_silo_mode?
+    Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
   end
 end
