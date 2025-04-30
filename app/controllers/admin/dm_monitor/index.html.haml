@@ -1,0 +1,9 @@
+%h2= "DM 모니터링 - #{@account.username}"
+
+%ul
+  - @direct_messages.each do |status|
+    %li
+      %strong= status.account.username
+      = ": #{status.text}"
+      %br/
+      %small= l(status.created_at, format: :short)
