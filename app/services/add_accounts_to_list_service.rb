@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
-class AuthorizeFollowService < BaseService
-  def call(target_account, source_account, message = nil)
-    return nil if Rails.configuration.x.whip.silo_mode
+class AddAccountsToListService < BaseService
+  def call(user, list, account_ids)
+    raise ActiveRecord::RecordNotFound unless list.account_id == user.account_id
 
-    return nil unless target_account.locked?
+    accounts = Account.where(id: account_ids)
 
-    follow_request = FollowRequest.create!(account: source_account, target_account: target_account)
-    ActivityPub::DeliveryWorker.perform_async(follow_request.id, source_account.id, 'Follow')
-    follow_request
+    ListAccount.transaction do
+      accounts.each do |account|
+        ListAccount.find_or_create_by!(list: list, account: account)
+      end
+    end
   end
 end
