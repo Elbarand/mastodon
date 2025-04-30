@@ -2,51 +2,49 @@
 
 class StatusesController < ApplicationController
   include SignatureVerification
-  include RateLimitHeaders
+  include WebAppControllerConcern
 
-  layout 'public'
-
-  before_action :set_status
-  before_action :set_cache_headers
-  before_action :set_link_headers
-  before_action :check_silenced_account
+  before_action :require_account!
+  before_action :set_status, only: [:show, :embed]
   before_action :check_chuchu_mode!
+  before_action :redirect_to_original, only: [:show]
+  before_action :check_account_suspension, only: [:show]
 
   def show
     respond_to do |format|
       format.html do
-        expires_in(0, public: true) if user_signed_in?
-        fresh_when(etag: @status, last_modified: @status.updated_at)
+        expires_in(3.minutes, public: public_fetch_mode?)
       end
+
       format.json do
-        render json: @status, serializer: REST::StatusSerializer
+        render json: @status, serializer: ActivityPub::NoteSerializer, adapter: ActivityPub::Adapter, content_type: 'application/activity+json'
       end
     end
+  end
+
+  def embed
+    expires_in(3.minutes, public: true)
+    render layout: 'embed'
   end
 
   private
 
   def set_status
     @status = Status.find(params[:id])
-  end
-
-  def set_cache_headers
-    response.headers['Cache-Control'] = 'no-store'
-  end
-
-  def set_link_headers
-    return unless @status.thread?
-
-    response.headers['Link'] = "<#{short_account_status_url(@status.account, @status)}>; rel=\"canonical\""
-  end
-
-  def check_silenced_account
-    not_found if @status.account.silenced?
+    raise ActiveRecord::RecordNotFound unless @status.distributable?
   end
 
   def check_chuchu_mode!
     if Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
       not_found
     end
+  end
+
+  def redirect_to_original
+    redirect_to status_path(@status.reblog), status: :moved_permanently if @status.reblog?
+  end
+
+  def check_account_suspension
+    not_found if @status.account.suspended?
   end
 end
