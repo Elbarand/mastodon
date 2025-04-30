@@ -1,11 +1,11 @@
-%h2= "Direct Messages for #{@account.username}"
+%div.admin-dms-page
+  %h2= "Direct Messages for #{@account.username}"
 
-- if @direct_messages.any?
-  %ul
-    - @direct_messages.each do |dm|
-      %li
-        %strong= dm.created_at.strftime('%Y-%m-%d %H:%M')
-        = " | "
-        = dm.content.html_safe
-- else
-  %p No direct messages found.
+  - if @direct_messages.any?
+    %ul
+      - @direct_messages.each do |dm|
+        %li
+          %strong= dm.created_at.strftime('%Y-%m-%d %H:%M')
+          %p= dm.content.html_safe
+  - else
+    %p.no-dm No direct messages found.
