@@ -10,7 +10,7 @@ class TagsController < ApplicationController
   vary_by -> { public_fetch_mode? ? 'Accept, Accept-Language, Cookie' : 'Accept, Accept-Language, Cookie, Signature' }
 
   before_action :require_account_signature!, if: -> { request.format == :json && authorized_fetch_mode? }
-  before_action :authenticate_user!, if: :limited_federation_mode?
+  before_action :authenticate_user!, if: :chuchu_silo_mode?
   before_action :set_local
   before_action :set_tag
   before_action :set_statuses, if: -> { request.format == :rss }
@@ -18,11 +18,6 @@ class TagsController < ApplicationController
   skip_before_action :require_functional!, unless: :limited_federation_mode?
 
   def show
-    if Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
-      not_found
-      return
-    end
-
     respond_to do |format|
       format.html do
         expires_in(15.seconds, public: true, stale_while_revalidate: 30.seconds, stale_if_error: 1.hour) unless user_signed_in?
@@ -62,5 +57,9 @@ class TagsController < ApplicationController
       id: tag_url(@tag),
       type: :ordered
     )
+  end
+
+  def chuchu_silo_mode?
+    Rails.configuration.x.chuchu.silo_mode && !user_signed_in?
   end
 end
